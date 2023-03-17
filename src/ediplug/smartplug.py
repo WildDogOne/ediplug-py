@@ -281,7 +281,6 @@ class SmartPlug(object):
             # more then one day
 
             for one_sched_day in sched_days:
-
                 dev_sched = doc.createElement("Device.System.Power.Schedule.%d" % one_sched_day["day"])
                 dev_sched.appendChild(doc.createTextNode(self._render_schedule(one_sched_day["sched"])))
                 dev_sched.attributes["value"] = one_sched_day["state"]
@@ -328,7 +327,7 @@ class SmartPlug(object):
                 val = dom.getElementsByTagName("CMD")[0].firstChild.nodeValue
 
                 if val is None:
-                    val = dom.getElementsByTagName("CMD")[0].getElementsByTagName("Device.System.Power.State")[0].\
+                    val = dom.getElementsByTagName("CMD")[0].getElementsByTagName("Device.System.Power.State")[0]. \
                         firstChild.nodeValue
 
                 return val
@@ -379,11 +378,11 @@ class SmartPlug(object):
         version = dom.getElementsByTagName("Run.FW.Version")[0].firstChild.nodeValue
         mac = dom.getElementsByTagName("Run.LAN.Client.MAC.Address")[0].firstChild.nodeValue
 
-        inf = {"vendor":vendor, "model":model, "version":version, "mac":mac}
+        inf = {"vendor": vendor, "model": model, "version": version, "mac": mac}
 
         # not all plugs/fw versions seem to return the system name ...
         try:
-                inf["name"] = dom.getElementsByTagName("Device.System.Name")[0].firstChild.nodeValue
+            inf["name"] = dom.getElementsByTagName("Device.System.Name")[0].firstChild.nodeValue
         except IndexError:
             pass
 
@@ -441,7 +440,7 @@ class SmartPlug(object):
         except:
             raise Exception("Failed to communicate with SmartPlug")
 
-        return power
+        return float(power)
 
     @property
     def current(self):
@@ -460,7 +459,7 @@ class SmartPlug(object):
         except:
             raise Exception("Failed to communicate with SmartPlug")
 
-        return current
+        return float(current)
 
     def _parse_schedule(self, sched):
         """
@@ -480,13 +479,12 @@ class SmartPlug(object):
 
         # first, unpack the packed schedule from the plug
         for packed in sched:
-
             int_packed = int(packed, 16)
 
-            sched_unpacked[idx_sched+0] = (int_packed >> 3) & 1
-            sched_unpacked[idx_sched+1] = (int_packed >> 2) & 1
-            sched_unpacked[idx_sched+2] = (int_packed >> 1) & 1
-            sched_unpacked[idx_sched+3] = (int_packed >> 0) & 1
+            sched_unpacked[idx_sched + 0] = (int_packed >> 3) & 1
+            sched_unpacked[idx_sched + 1] = (int_packed >> 2) & 1
+            sched_unpacked[idx_sched + 2] = (int_packed >> 1) & 1
+            sched_unpacked[idx_sched + 3] = (int_packed >> 0) & 1
 
             idx_sched += 4
 
@@ -546,7 +544,7 @@ class SmartPlug(object):
 
         # second, pack the minute array from above into the plug format and make a string out of it
         for i in range(0, 60 * 24, 4):
-            packed = (sched[i] << 3) + (sched[i+1] << 2) + (sched[i+2] << 1) + (sched[i+3] << 0)
+            packed = (sched[i] << 3) + (sched[i + 1] << 2) + (sched[i + 2] << 1) + (sched[i + 3] << 0)
             sched_str += "%X" % packed
 
         return sched_str
@@ -579,12 +577,11 @@ class SmartPlug(object):
             dom_sched = dom.getElementsByTagName("CMD")[0].getElementsByTagName("SCHEDULE")[0]
 
             for i in range(0, 7):
-
                 sched.append(
                     {"day": i,
                      "state": dom_sched.getElementsByTagName("Device.System.Power.Schedule.%d" % i)[0].attributes[
                          "value"].
-                         firstChild.nodeValue,
+                     firstChild.nodeValue,
                      "sched": self._parse_schedule(
                          dom_sched.getElementsByTagName("Device.System.Power.Schedule.%d" % i)[0].
                          firstChild.nodeValue)})
@@ -622,24 +619,25 @@ class SmartPlug(object):
 
         return res
 
+
 if __name__ == "__main__":
 
     usage = "%prog [options]"
 
     parser = par.OptionParser(usage)
 
-    parser.add_option("-v", "--verbose",  action="store_true", help="Print debug information")
+    parser.add_option("-v", "--verbose", action="store_true", help="Print debug information")
 
-    parser.add_option("-H", "--host",  default="172.16.100.75", help="Base URL of the SmartPlug")
-    parser.add_option("-l", "--login",  default="admin", help="Login user to authenticate with SmartPlug")
-    parser.add_option("-p", "--password",  default="1234", help="Password to authenticate with SmartPlug")
+    parser.add_option("-H", "--host", default="172.16.100.75", help="Base URL of the SmartPlug")
+    parser.add_option("-l", "--login", default="admin", help="Login user to authenticate with SmartPlug")
+    parser.add_option("-p", "--password", default="1234", help="Password to authenticate with SmartPlug")
 
-    parser.add_option("-i", "--info",  action="store_true", help="Get plug information")
-    parser.add_option("-g", "--get",  action="store_true", help="Get state of plug")
-    parser.add_option("-s", "--set",  help="Set state of plug: ON or OFF")
+    parser.add_option("-i", "--info", action="store_true", help="Get plug information")
+    parser.add_option("-g", "--get", action="store_true", help="Get state of plug")
+    parser.add_option("-s", "--set", help="Set state of plug: ON or OFF")
 
-    parser.add_option("-w", "--power",  action="store_true", help="Get plug power consumption (only SP2101W)")
-    parser.add_option("-a", "--current",  action="store_true", help="Get plug current consumption (only SP2101W)")
+    parser.add_option("-w", "--power", action="store_true", help="Get plug power consumption (only SP2101W)")
+    parser.add_option("-a", "--current", action="store_true", help="Get plug current consumption (only SP2101W)")
 
     parser.add_option("-G", "--getsched", action="store_true", help="Get schedule from Plug")
     parser.add_option("-P", "--getschedpy", action="store_true", help="Get schedule from Plug as Python list")
@@ -672,7 +670,6 @@ if __name__ == "__main__":
         p.state = options.set
 
     if options.power:
-
         print("%s W" % p.power)
 
     if options.current:
